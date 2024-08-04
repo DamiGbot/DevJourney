@@ -83,3 +83,30 @@ terraform workspace show
 ```bash
 terraform workspace delete <workspace_name>
 ```
+
+### Use Cases
+
+- Managing different environments (e.g., development, staging, production)
+- Feature Branches, temporary environments to test features
+
+## Terraform State Command
+
+Terraform state command is used for advanced state management. There might be situations where you might want to modify the state, instead of modifying the terraform state file directly this is where terraform state command comes to help.
+
+### show state information
+
+```bash
+terraform show
+```
+
+### list resources
+
+```bash
+terraform state list
+```
+
+### show resource information
+
+```bash
+terraform state show resource_type.resource_name
+```
