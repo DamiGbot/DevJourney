@@ -142,3 +142,143 @@ spec:
     limits.cpu: "2"
     limits.memory: "2Gi"
 ```
+
+## Taints and Tolerations
+
+Taints and tolerations work together to ensure that Pods are not scheduled onto inappropriate nodes. They allow nodes to repel a set of Pods unless those Pods explicitly tolerate the taints applied to those nodes.
+
+- **Taint**: Used to repel a set of Pods from a Node. By default, Pods do not tolerate any taints, meaning if a Node has a taint, no Pod will be scheduled on that Node unless it has a matching toleration.
+- **Toleration**: Used to allow a Pod to be scheduled on a Node with specific taints.
+
+Taints are applied to Nodes, while tolerations are applied to Pods.
+
+### Setting a Taint on a Node
+
+#### Command Schema
+
+```bash
+kubectl taint nodes <node_name> <key>=<value>:<taint-effect>
+```
+
+#### Taint Effects
+
+- `NoSchedule`: Pods that do not tolerate the taint will not be scheduled on the Node.
+- `PreferNoSchedule`: Kubernetes will try to avoid placing Pods that do not tolerate the taint on the Node.
+- `NoExecute`: Existing Pods that do not tolerate the taint will be evicted, and new Pods that do not tolerate the taint will not be scheduled on the Node.
+
+#### Example
+
+```bash
+kubectl taint nodes node1 key1=value1:NoSchedule
+```
+
+### Set a Toleration on a Pod
+
+```bash
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    env: test
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    imagePullPolicy: IfNotPresent
+  tolerations:
+  - key: "key1"
+    operator: "Exists"
+    effect: "NoSchedule"
+
+```
+
+#### Alternative YAML Schema
+
+```bash
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    env: test
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    imagePullPolicy: IfNotPresent
+  tolerations:
+  - key: "key1"
+    value: "value1"
+    operator: "Equal"
+    effect: "NoSchedule"
+```
+
+### Removing Taints
+
+To remove a taint from a Node, use the following command:
+
+```bash
+kubectl taint nodes node1 key1=value1:NoSchedule-
+```
+
+## Node Affinty
+
+Node affinity is the opposite of taints. It is used to attract Pods to specific Nodes based on labels. This can help ensure that Pods are scheduled on Nodes with certain characteristics, such as geographic location or hardware capabilities.
+
+### Types of Node Affinity
+
+- `requiredDuringSchedulingIgnoredDuringExecution`: Specifies that the rule must be met for the Pod to be scheduled on the Node.
+- `preferredDuringSchedulingIgnoredDuringExecution`: Specifies that the rule is preferred but not mandatory for scheduling the Pod on the Node.
+
+#### Example YAML for Node Affinity
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: disktype
+                operator: In
+                values:
+                  - ssd
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+              - key: zone
+                operator: In
+                values:
+                  - east
+                  - west
+```
+
+## Additional Information
+
+### _NodeSelector_
+
+NodeSelector is a simpler form of node affinity that does not distinguish between required and preferred scheduling. It is specified directly in the Pod spec and uses exact matches for labels.
+
+### Example YAML for NodeSelector
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+  nodeSelector:
+    disktype: ssd
+```
