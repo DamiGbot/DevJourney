@@ -114,3 +114,31 @@ spec:
     - name: my-container
       image: nginx
 ```
+
+## Deployment Strategies
+
+### Recreate
+
+In the Recreate strategy, all existing Pods are terminated before new Pods are created. This results in a short period of downtime while the new Pods are being deployed. This strategy is simple but may not be suitable for production environments where high availability is critical.
+
+### Rolling
+
+The Rolling strategy updates Pods incrementally, replacing a few old Pods with new Pods at a time. This ensures that some instances of the application are always available, reducing or eliminating downtime. It's a common choice for updating applications without affecting the overall availability.
+
+### Blue/Green Deployment
+
+In Blue/Green deployment, both the old (Blue) and new (Green) environments are spun up, but user requests are directed to the old environment while the new environment is thoroughly tested. After successful testing, traffic is switched from Blue to Green. This approach requires maintaining two environments, but it allows for a quick rollback if issues arise.
+
+### Canary Deployment
+
+In Canary deployment, the old version continues to run as usual, while a small percentage of user traffic is routed to the new version (Canary). This allows for testing in a live environment with minimal impact. If the Canary deployment is successful, the traffic is gradually increased to the new version until it fully replaces the old version. If issues are detected, the deployment can be rolled back using either the Recreate or Rolling strategy.
+
+## Jobs and CronJobs
+
+### Jobs
+
+A Job in Kubernetes is a type of workload that runs until a specified task is completed. You can control how many times the Job runs by setting the `completions` field, and you can configure the number of Pods to run in parallel using the `parallelism` field. Jobs are ideal for batch processing tasks, such as data processing or report generation.
+
+### CronJobs
+
+CronJobs are a type of Job that runs on a scheduled basis, similar to cron jobs in Linux. You define a schedule in Cron format, and Kubernetes will automatically create Jobs based on that schedule. CronJobs are useful for tasks that need to run periodically, such as database backups or regular data imports.
